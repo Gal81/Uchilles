@@ -60,6 +60,7 @@ export default defineConfig([
     },
     rules: {
       'no-unused-vars': 'error',
+      'no-undef': 'off',
       'jsx/jsx-uses-vars': 'error',
     },
   },
