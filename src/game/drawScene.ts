@@ -1,6 +1,10 @@
 import type { GameState } from './types.ts';
 import { drawObstacle } from './drawObstacle.ts';
 import { drawRunner } from './drawRunner.ts';
+import { drawRoadside } from './drawRoadside.ts';
+import { getRoadHalfWidth } from './projection.ts';
+import { drawCity } from './drawCity.ts';
+import { drawClouds } from './drawClouds.ts';
 import type { Locale } from '../locales/index.ts';
 
 function fillPolygon(
@@ -32,31 +36,21 @@ export function drawScene(
   const horizonY = height * 0.29;
   const centerX = width / 2;
 
-  for (let i = 0; i < 12; i++) {
-    const x = (i / 12) * width;
-    const buildingHeight =
-      height * (0.08 + ((i * 37) % 12) * 0.009);
-    ctx.fillStyle = i % 2 ? '#71858a' : '#a2a39a';
-    ctx.fillRect(x, horizonY - buildingHeight, width / 13, buildingHeight);
+  drawClouds(ctx, width, height, game.distance);
+  drawCity(ctx, width, horizonY, locale);
 
-    ctx.fillStyle = '#d9c7a5';
-    for (let j = 0; j < 3; j++) {
-      ctx.fillRect(
-        x + 5,
-        horizonY - buildingHeight + 10 + j * 14,
-        4,
-        5,
-      );
-    }
-  }
+  drawRoadside(ctx, width, height, game.roadOffset);
+
+  const roadTopHalfWidth = getRoadHalfWidth(width, 0);
+  const roadBottomHalfWidth = getRoadHalfWidth(width, 1);
 
   fillPolygon(
     ctx,
     [
-      [centerX - width * 0.12, horizonY],
-      [centerX + width * 0.12, horizonY],
-      [width * 1.08, height],
-      [-width * 0.08, height],
+      [centerX - roadTopHalfWidth, horizonY],
+      [centerX + roadTopHalfWidth, horizonY],
+      [centerX + roadBottomHalfWidth, height],
+      [centerX - roadBottomHalfWidth, height],
     ],
     '#4a5357',
   );
@@ -64,10 +58,10 @@ export function drawScene(
   ctx.strokeStyle = '#e7d7b5';
   ctx.lineWidth = 3;
   ctx.beginPath();
-  ctx.moveTo(centerX - width * 0.12, horizonY);
-  ctx.lineTo(-width * 0.08, height);
-  ctx.moveTo(centerX + width * 0.12, horizonY);
-  ctx.lineTo(width * 1.08, height);
+  ctx.moveTo(centerX - roadTopHalfWidth, horizonY);
+  ctx.lineTo(centerX - roadBottomHalfWidth, height);
+  ctx.moveTo(centerX + roadTopHalfWidth, horizonY);
+  ctx.lineTo(centerX + roadBottomHalfWidth, height);
   ctx.stroke();
 
   for (const divider of [-1, 1]) {
@@ -75,11 +69,11 @@ export function drawScene(
       const z = (i / 9 + game.roadOffset) % 1;
       const depth = z * z;
       const y = horizonY + (height - horizonY) * depth;
-      const roadWidth = width * 0.24 + width * 0.83 * depth;
-      const x = centerX + divider * roadWidth * 0.155;
+      const roadHalfWidth = getRoadHalfWidth(width, depth);
+      const x = centerX + divider * roadHalfWidth * 0.31;
       const markerHeight = 3 + depth * 24;
       ctx.fillStyle = '#d7d4c8';
-      ctx.fillRect(x - 1.5, y, 3 + depth * 2, markerHeight);
+      ctx.fillRect(x - 1.5, y, 3, markerHeight);
     }
   }
 

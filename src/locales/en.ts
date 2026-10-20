@@ -6,4 +6,6 @@ export const en = {
   distance: (meters: number) => `Distance: ${meters} m`,
   gameOver: 'Game over!',
   restartHint: 'Press R, Space, or tap to restart',
+  dinerSign: 'DINER',
+  hotelSign: 'HOTEL',
 } as const;

@@ -4,6 +4,10 @@ export type ProjectedPosition = {
   scale: number;
 };
 
+export function getRoadHalfWidth(width: number, depth: number) {
+  return width * (0.12 + 0.46 * depth);
+}
+
 export function projectLanePosition(
   width: number,
   height: number,
@@ -12,7 +16,7 @@ export function projectLanePosition(
 ): ProjectedPosition {
   const horizonY = height * 0.29;
   const depth = z * z;
-  const roadWidth = width * 0.24 + (width * 1.16 - width * 0.24) * depth;
+  const roadWidth = getRoadHalfWidth(width, depth) * 2;
 
   return {
     x: width / 2 + (lane - 1) * roadWidth / 3,
