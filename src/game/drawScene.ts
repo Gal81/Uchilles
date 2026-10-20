@@ -2,7 +2,11 @@ import type { GameState } from './types.ts';
 import { drawObstacle } from './drawObstacle.ts';
 import { drawRunner } from './drawRunner.ts';
 import { drawRoadside } from './drawRoadside.ts';
-import { getRoadHalfWidth } from './projection.ts';
+import {
+  getRoadDepth,
+  getRoadHalfWidth,
+  ROAD_FEATURE_SECTIONS,
+} from './projection.ts';
 import { drawCity } from './drawCity.ts';
 import { drawClouds } from './drawClouds.ts';
 import type { Locale } from '../locales/index.ts';
@@ -65,9 +69,9 @@ export function drawScene(
   ctx.stroke();
 
   for (const divider of [-1, 1]) {
-    for (let i = 0; i < 9; i++) {
-      const z = (i / 9 + game.roadOffset) % 1;
-      const depth = z * z;
+    for (let i = 0; i < ROAD_FEATURE_SECTIONS; i++) {
+      const z = (i / ROAD_FEATURE_SECTIONS + game.roadOffset) % 1;
+      const depth = getRoadDepth(z);
       const y = horizonY + (height - horizonY) * depth;
       const roadHalfWidth = getRoadHalfWidth(width, depth);
       const x = centerX + divider * roadHalfWidth * 0.31;

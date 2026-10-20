@@ -1,4 +1,8 @@
-import { getRoadHalfWidth } from './projection.ts';
+import {
+  getRoadDepth,
+  getRoadHalfWidth,
+  ROAD_FEATURE_SECTIONS,
+} from './projection.ts';
 
 type Side = -1 | 1;
 type RoadsideObject = 'tree' | 'bush' | 'stop';
@@ -189,7 +193,6 @@ export function drawRoadside(
 ) {
   drawGroundAndShoulders(ctx, width, height);
 
-  const sections = 8;
   const objects: Array<{
     side: Side;
     z: number;
@@ -198,8 +201,8 @@ export function drawRoadside(
   }> = [];
 
   for (const side of [-1, 1] as const) {
-    for (let i = 0; i < sections; i++) {
-      const z = (i / sections + roadOffset) % 1;
+    for (let i = 0; i < ROAD_FEATURE_SECTIONS; i++) {
+      const z = (i / ROAD_FEATURE_SECTIONS + roadOffset) % 1;
       const index = i + (side === 1 ? 2 : 0);
       const kinds: RoadsideObject[] = [
         'tree',
@@ -218,7 +221,7 @@ export function drawRoadside(
   objects
     .sort((a, b) => a.z - b.z)
     .forEach(({ side, z, kind, index }) => {
-      const depth = z * z;
+      const depth = getRoadDepth(z);
       const point = roadsidePoint(
         width,
         height,

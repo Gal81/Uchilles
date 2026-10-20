@@ -10,6 +10,7 @@ const LANE_CHANGE_DURATION = 0.85;
 const PURSUER_LANE_CHANGE_DURATION = 0.55;
 const PURSUER_LOOKAHEAD = 0.42;
 const PLAYER_COLLISION_LANE_RADIUS = 0.4;
+const ROAD_SPEED = 0.27;
 
 export function createGameState(): GameState {
   return {
@@ -124,7 +125,7 @@ export function updateGame(game: GameState, dt: number) {
   if (game.status !== 'running') return;
 
   game.distance += dt * 8;
-  game.roadOffset = (game.roadOffset + dt * 0.55) % 1;
+  game.roadOffset = (game.roadOffset + dt * ROAD_SPEED) % 1;
   game.spawnTimer += dt;
 
   game.player.animationTime += dt;
@@ -146,7 +147,7 @@ export function updateGame(game: GameState, dt: number) {
   }
 
   game.obstacles.forEach((obstacle) => {
-    obstacle.z += dt * 0.27;
+    obstacle.z += dt * ROAD_SPEED;
     obstacle.animationTime += dt;
 
     if (
