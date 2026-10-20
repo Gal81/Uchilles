@@ -1,16 +1,16 @@
-export type Obstacle = {
-  id: number;
-  lane: number;
-  z: number;
-  kind: 'barrier' | 'car';
-};
+import type { Obstacle } from './entities/obstacle.ts';
+import type {
+  PlayerRunner,
+  Pursuer,
+} from './entities/runner.ts';
 
 export type GameState = {
-  lane: number;
+  player: PlayerRunner;
+  pursuers: Pursuer[];
   roadOffset: number;
   obstacles: Obstacle[];
   spawnTimer: number;
-  nextId: number;
+  nextObstacleId: number;
   status: 'running' | 'over';
   distance: number;
 };
