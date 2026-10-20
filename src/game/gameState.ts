@@ -1,4 +1,5 @@
 import { createObstacle } from './entities/obstacle.ts';
+import type { Obstacle } from './entities/obstacle.ts';
 import type { Lane } from './entities/runner.ts';
 import {
   createPlayer,
@@ -11,6 +12,10 @@ const PURSUER_LANE_CHANGE_DURATION = 0.55;
 const PURSUER_LOOKAHEAD = 0.42;
 const PLAYER_COLLISION_LANE_RADIUS = 0.4;
 const ROAD_SPEED = 0.27;
+const OBSTACLE_SPEED: Record<Obstacle['kind'], number> = {
+  barrier: ROAD_SPEED,
+  car: 0.38,
+};
 
 export function createGameState(): GameState {
   return {
@@ -147,7 +152,7 @@ export function updateGame(game: GameState, dt: number) {
   }
 
   game.obstacles.forEach((obstacle) => {
-    obstacle.z += dt * ROAD_SPEED;
+    obstacle.z += dt * OBSTACLE_SPEED[obstacle.kind];
     obstacle.animationTime += dt;
 
     if (
