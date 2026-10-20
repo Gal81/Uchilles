@@ -1,6 +1,7 @@
 import type { GameState } from './types.ts';
 import { drawObstacle } from './drawObstacle.ts';
 import { drawRunner } from './drawRunner.ts';
+import type { Locale } from '../locales/index.ts';
 
 function fillPolygon(
   ctx: CanvasRenderingContext2D,
@@ -20,6 +21,7 @@ export function drawScene(
   game: GameState,
   width: number,
   height: number,
+  locale: Locale,
 ) {
   const sky = ctx.createLinearGradient(0, 0, 0, height);
   sky.addColorStop(0, '#8ab6c1');
@@ -93,10 +95,10 @@ export function drawScene(
 
   ctx.fillStyle = '#14242b';
   ctx.font = 'bold 23px system-ui';
-  ctx.fillText('УХИЛЛЕС', 18, 38);
+  ctx.fillText(locale.gameTitle, 18, 38);
 
   ctx.font = '14px system-ui';
-  ctx.fillText(`Дистанция: ${Math.floor(game.distance)} м`, 18, 61);
+  ctx.fillText(locale.distance(Math.floor(game.distance)), 18, 61);
 
   if (game.status === 'over') {
     ctx.fillStyle = 'rgba(13, 24, 31, 0.76)';
@@ -105,16 +107,16 @@ export function drawScene(
     ctx.textAlign = 'center';
     ctx.fillStyle = '#fff';
     ctx.font = 'bold 30px system-ui';
-    ctx.fillText('Столкновение!', centerX, height * 0.43);
+    ctx.fillText(locale.gameOver, centerX, height * 0.43);
 
     ctx.font = '17px system-ui';
     ctx.fillText(
-      `Дистанция: ${Math.floor(game.distance)} м`,
+      locale.distance(Math.floor(game.distance)),
       centerX,
       height * 0.43 + 35,
     );
     ctx.fillText(
-      'Нажми R, пробел или коснись экрана',
+      locale.restartHint,
       centerX,
       height * 0.43 + 72,
     );

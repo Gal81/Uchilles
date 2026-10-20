@@ -1,4 +1,5 @@
 import {
+  useSyncExternalStore,
   useRef,
   useEffect,
 } from 'react';
@@ -8,10 +9,23 @@ import {
   updateGame,
 } from './game/gameState.ts';
 import { drawScene } from './game/drawScene.ts';
+import { getLocale, subscribeToLocale } from './locales/index.ts';
 import './App.css';
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const locale = useSyncExternalStore(
+    subscribeToLocale,
+    getLocale,
+    getLocale,
+  );
+  const localeRef = useRef(locale);
+
+  useEffect(() => {
+    localeRef.current = locale;
+    document.title = locale.documentTitle;
+    document.documentElement.lang = locale.languageTag;
+  }, [locale]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -88,7 +102,7 @@ function App() {
       previousTime = time;
 
       updateGame(game, dt);
-      drawScene(ctx, game, width, height);
+      drawScene(ctx, game, width, height, localeRef.current);
       animationId = requestAnimationFrame(tick);
     };
 
@@ -114,7 +128,7 @@ function App() {
       <canvas
         ref={canvasRef}
         className="game-canvas"
-        aria-label="Ухиллес — городской раннер"
+        aria-label={locale.canvasLabel}
       />
     </main>
   );
