@@ -82,9 +82,10 @@ export function drawScene(
     .sort((a, b) => a.z - b.z)
     .forEach((obstacle) => drawObstacle(ctx, obstacle, width, height));
 
-  game.pursuers.forEach((pursuer) => {
-    drawRunner(ctx, pursuer, width, height);
-  });
+  game.pursuers
+    .slice()
+    .sort((a, b) => a.z - b.z)
+    .forEach((pursuer) => drawRunner(ctx, pursuer, width, height));
   drawRunner(ctx, game.player, width, height);
 
   ctx.fillStyle = '#14242b';

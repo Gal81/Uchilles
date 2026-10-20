@@ -3,6 +3,9 @@ export type PursuerKind = 'standard';
 
 type RunnerBase = {
   lane: Lane;
+  lanePosition: number;
+  laneChangeStart: number;
+  laneChangeElapsed: number;
   z: number;
   animationTime: number;
 };
@@ -10,15 +13,13 @@ type RunnerBase = {
 export type PlayerRunner = RunnerBase & {
   id: 'player';
   role: 'player';
-  lanePosition: number;
-  laneChangeStart: number;
-  laneChangeElapsed: number;
 };
 
 export type Pursuer = RunnerBase & {
   id: string;
   role: 'pursuer';
   kind: PursuerKind;
+  homeLane: Lane;
 };
 
 export type Runner = PlayerRunner | Pursuer;
@@ -43,7 +44,11 @@ export function createPursuers(): Pursuer[] {
     role: 'pursuer',
     kind: 'standard',
     lane,
-    z: 0.83,
+    lanePosition: lane,
+    laneChangeStart: lane,
+    laneChangeElapsed: 0,
+    homeLane: lane,
+    z: lane === 0 ? 0.83 : 0.79,
     animationTime: 0,
   }));
 }

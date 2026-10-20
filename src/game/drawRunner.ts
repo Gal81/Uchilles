@@ -9,13 +9,10 @@ export function drawRunner(
   width: number,
   height: number,
 ) {
-  const lane = runner.role === 'player'
-    ? runner.lanePosition
-    : runner.lane;
   const { x, y, scale } = projectLanePosition(
     width,
     height,
-    lane,
+    runner.lanePosition,
     runner.z,
   );
 
