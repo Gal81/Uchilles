@@ -10,6 +10,9 @@ type RunnerBase = {
 export type PlayerRunner = RunnerBase & {
   id: 'player';
   role: 'player';
+  lanePosition: number;
+  laneChangeStart: number;
+  laneChangeElapsed: number;
 };
 
 export type Pursuer = RunnerBase & {
@@ -25,6 +28,9 @@ export function createPlayer(): PlayerRunner {
     id: 'player',
     role: 'player',
     lane: 1,
+    lanePosition: 1,
+    laneChangeStart: 1,
+    laneChangeElapsed: 0,
     z: 0.64,
     animationTime: 0,
   };
