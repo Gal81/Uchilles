@@ -16,6 +16,10 @@ const PURSUER_ENTRY_SPEED = 0.18;
 const PURSUER_CATCH_DEPTH_MARGIN = 0.015;
 const PURSUER_CATCH_LANE_RADIUS = 0.25;
 const PLAYER_COLLISION_LANE_RADIUS = 0.4;
+const JUMP_DURATION = 0.72;
+const JUMP_RECHARGE_DURATION = 2.8;
+const JUMP_HEIGHT = 34;
+const JUMP_COLLISION_HEIGHT = 13;
 const PURSUER_COLLISION_LANE_RADIUS = 0.36;
 const PURSUER_RESPAWN_DELAY = 3.5;
 const PURSUER_FATIGUE_RATE = 0.012;
@@ -64,6 +68,14 @@ export function changePlayerLane(game: GameState, direction: -1 | 1) {
   if (nextLane === 0 || nextLane === 1 || nextLane === 2) {
     setRunnerLane(game.player, nextLane);
   }
+}
+
+export function jumpPlayer(game: GameState) {
+  if (game.status !== 'running') return;
+  if (game.player.jumpCharge < 1 || game.player.jumpElapsed !== null) return;
+
+  game.player.jumpCharge = 0;
+  game.player.jumpElapsed = 0;
 }
 
 function setRunnerLane(
@@ -192,6 +204,23 @@ export function updateGame(game: GameState, dt: number) {
 
   game.player.animationTime += dt;
   updateRunnerLane(game.player, dt, LANE_CHANGE_DURATION);
+  game.player.jumpCharge = Math.min(
+    1,
+    game.player.jumpCharge + dt / JUMP_RECHARGE_DURATION,
+  );
+  if (game.player.jumpElapsed !== null) {
+    game.player.jumpElapsed += dt;
+    if (game.player.jumpElapsed >= JUMP_DURATION) {
+      game.player.jumpElapsed = null;
+      game.player.jumpHeight = 0;
+      game.player.jumpProgress = 0;
+    } else {
+      const jumpProgress = game.player.jumpElapsed / JUMP_DURATION;
+      game.player.jumpProgress = jumpProgress;
+      game.player.jumpHeight =
+        Math.sin(jumpProgress * Math.PI) * JUMP_HEIGHT;
+    }
+  }
 
   game.pursuers.forEach((pursuer) => {
     pursuer.animationTime += dt;
@@ -230,6 +259,7 @@ export function updateGame(game: GameState, dt: number) {
     obstacle.animationTime += dt;
 
     if (
+      game.player.jumpHeight < JUMP_COLLISION_HEIGHT &&
       Math.abs(obstacle.lane - game.player.lanePosition) <=
         PLAYER_COLLISION_LANE_RADIUS &&
       obstacle.z >= 0.63 &&

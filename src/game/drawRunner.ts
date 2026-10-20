@@ -21,7 +21,12 @@ export function drawRunner(
   ctx.scale(scale, scale);
 
   if (runner.role === 'player') {
-    drawHero(ctx, runner.animationTime);
+    drawHero(
+      ctx,
+      runner.animationTime,
+      runner.jumpHeight,
+      runner.jumpProgress,
+    );
   } else {
     drawMilitaryPursuer(ctx, runner);
   }

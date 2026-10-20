@@ -6,6 +6,7 @@ import {
 import {
   createGameState,
   changePlayerLane,
+  jumpPlayer,
   updateGame,
 } from './game/gameState.ts';
 import { drawScene } from './game/drawScene.ts';
@@ -55,7 +56,7 @@ function App() {
     };
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (['ArrowLeft', 'ArrowRight', ' '].includes(event.key)) {
+      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', ' '].includes(event.key)) {
         event.preventDefault();
       }
 
@@ -70,6 +71,8 @@ function App() {
         (event.key === ' ' || event.key.toLowerCase() === 'r')
       ) {
         restart();
+      } else if (event.key === 'ArrowUp' && !event.repeat) {
+        jumpPlayer(game);
       }
     };
 
@@ -92,6 +95,8 @@ function App() {
 
       if (Math.abs(dx) > 25 && Math.abs(dx) > Math.abs(dy)) {
         changePlayerLane(game, dx > 0 ? 1 : -1);
+      } else if (dy < -35) {
+        jumpPlayer(game);
       }
     };
 

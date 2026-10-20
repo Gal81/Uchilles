@@ -44,69 +44,84 @@ function drawLeg(
   ctx.stroke();
 }
 
-export function drawHero(ctx: CanvasRenderingContext2D, time: number) {
+export function drawHero(
+  ctx: CanvasRenderingContext2D,
+  time: number,
+  jumpHeight = 0,
+  jumpProgress = 0,
+) {
+  const progress = Math.max(0, Math.min(1, jumpProgress));
+  const airborne = Math.sin(progress * Math.PI);
+  const anticipation =
+    progress < 0.16 ? Math.sin((progress / 0.16) * Math.PI) : 0;
+  const landing = progress > 0.82 ? (progress - 0.82) / 0.18 : 0;
   const phase = time * 9;
   const leftStride = Math.sin(phase);
   const rightStride = Math.sin(phase + Math.PI);
   const leftFootY =
-    leftStride * 3 - Math.max(0, -leftStride) * 4;
+    leftStride * 3 * (1 - airborne) -
+    Math.max(0, -leftStride) * 4 * (1 - airborne) -
+    airborne * 8 +
+    anticipation * 2;
   const rightFootY =
-    rightStride * 3 - Math.max(0, -rightStride) * 4;
+    rightStride * 3 * (1 - airborne) -
+    Math.max(0, -rightStride) * 4 * (1 - airborne) -
+    airborne * 8 +
+    anticipation * 2;
   const bob = (1 - Math.cos(phase * 2)) * 0.7;
-  const leftArmSwing = -leftStride;
-  const rightArmSwing = -rightStride;
+  const leftArmSwing = -leftStride * (1 - airborne);
+  const rightArmSwing = -rightStride * (1 - airborne);
 
   ctx.save();
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
 
-  // A simple ground shadow anchors the runner to the road.
-  ctx.fillStyle = 'rgba(20, 25, 27, 0.3)';
+  ctx.fillStyle = `rgba(20, 25, 27, ${0.3 - airborne * 0.16})`;
   ctx.beginPath();
-  ctx.ellipse(0, 4, 15, 4, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, 4, 15 - airborne * 4, 4 - airborne, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.translate(0, -bob);
+  ctx.translate(0, -bob - jumpHeight + anticipation * 3 + landing * 2);
 
   // Legs alternate in depth and lift, with the rear leg drawn first.
   drawLeg(
     ctx,
-    3,
-    3 + rightStride * 0.8,
+    3 - airborne,
+    3 - airborne + rightStride * 0.8 * (1 - airborne),
     rightFootY,
     '#594536',
     '#28383a',
   );
   drawLeg(
     ctx,
-    -3,
-    -3 + leftStride * 0.8,
+    -3 + airborne,
+    -3 + airborne - leftStride * 0.8 * (1 - airborne),
     leftFootY,
     '#785943',
     '#34464a',
   );
 
   // Arms counter-swing with their matching legs, as in a natural run.
-  const rightElbowY = -31 + rightArmSwing * 2.5;
-  const rightHandY = -24 + rightArmSwing * 5;
+  const rightElbowY = -31 + rightArmSwing * 2.5 - airborne * 5;
+  const rightHandY = -24 + rightArmSwing * 5 - airborne * 9;
   drawSegment(ctx, 8, -39, 10, rightElbowY, '#704936', 5);
   drawSegment(
     ctx,
     10,
     rightElbowY,
-    9 + rightArmSwing * 1.5,
+    9 + rightArmSwing * 1.5 - airborne * 2,
     rightHandY,
     '#a96a43',
     4,
   );
-  const leftElbowY = -31 + leftArmSwing * 2.5;
-  const leftHandY = -24 + leftArmSwing * 5;
+  const leftElbowY = -31 + leftArmSwing * 2.5 - airborne * 5;
+  const leftHandY = -24 + leftArmSwing * 5 - airborne * 9;
   drawSegment(ctx, -8, -39, -10, leftElbowY, '#704936', 5);
   drawSegment(
     ctx,
     -10,
     leftElbowY,
-    -9 - leftArmSwing * 1.5,
+    -9 - leftArmSwing * 1.5 + airborne * 2,
     leftHandY,
     '#bd783d',
     4,

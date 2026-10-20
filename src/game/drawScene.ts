@@ -100,6 +100,26 @@ export function drawScene(
   ctx.font = '14px system-ui';
   ctx.fillText(locale.distance(Math.floor(game.distance)), 18, 61);
 
+  const jumpBarX = 18;
+  const jumpBarY = 78;
+  const jumpBarWidth = 116;
+  const jumpBarHeight = 9;
+  ctx.font = 'bold 11px system-ui';
+  ctx.fillStyle = '#14242b';
+  ctx.fillText(locale.jumpLabel, jumpBarX, jumpBarY + 24);
+  ctx.fillStyle = 'rgba(20, 36, 43, 0.55)';
+  ctx.fillRect(jumpBarX, jumpBarY, jumpBarWidth, jumpBarHeight);
+  ctx.fillStyle = game.player.jumpCharge >= 1 ? '#60c96b' : '#e5b84d';
+  ctx.fillRect(
+    jumpBarX + 1,
+    jumpBarY + 1,
+    (jumpBarWidth - 2) * game.player.jumpCharge,
+    jumpBarHeight - 2,
+  );
+  ctx.strokeStyle = '#14242b';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(jumpBarX, jumpBarY, jumpBarWidth, jumpBarHeight);
+
   if (game.status === 'over') {
     ctx.fillStyle = 'rgba(13, 24, 31, 0.76)';
     ctx.fillRect(0, 0, width, height);
