@@ -1,24 +1,60 @@
 import type { Locale } from '../locales/index.ts';
 
 type BuildingStyle = {
+  x: number;
   width: number;
   height: number;
   color: string;
-  roof: 'flat' | 'antenna' | 'steps' | 'waterTank';
+  roof: 'flat' | 'antenna' | 'steps' | 'waterTank' | 'peaked';
   sign?: 'diner' | 'hotel';
 };
 
-const BUILDINGS: BuildingStyle[] = [
-  { width: 0.105, height: 0.27, color: '#687d80', roof: 'flat' },
-  { width: 0.078, height: 0.36, color: '#9b9b8d', roof: 'steps' },
-  { width: 0.12, height: 0.31, color: '#74888a', roof: 'flat', sign: 'hotel' },
-  { width: 0.08, height: 0.43, color: '#777f82', roof: 'antenna' },
-  { width: 0.11, height: 0.34, color: '#a2a091', roof: 'waterTank' },
-  { width: 0.09, height: 0.47, color: '#65797e', roof: 'steps' },
-  { width: 0.12, height: 0.3, color: '#8d9088', roof: 'flat', sign: 'diner' },
-  { width: 0.085, height: 0.4, color: '#718286', roof: 'antenna' },
-  { width: 0.115, height: 0.33, color: '#9b9a8d', roof: 'flat' },
-  { width: 0.095, height: 0.45, color: '#697d80', roof: 'waterTank' },
+type CityLayer = {
+  baseline: number;
+  buildings: BuildingStyle[];
+  windows: [string, string, string];
+};
+
+const CITY_LAYERS: CityLayer[] = [
+  {
+    baseline: 0,
+    windows: ['#747b70', '#85867a', '#716f65'],
+    buildings: [
+      { x: 0.025, width: 0.06, height: 0.2, color: '#4e5d60', roof: 'flat' },
+      { x: 0.105, width: 0.075, height: 0.27, color: '#536164', roof: 'steps' },
+      { x: 0.215, width: 0.07, height: 0.19, color: '#49595d', roof: 'flat' },
+      { x: 0.305, width: 0.05, height: 0.22, color: '#4b5a5e', roof: 'steps' },
+      { x: 0.66, width: 0.07, height: 0.21, color: '#4d5c60', roof: 'flat' },
+      { x: 0.765, width: 0.065, height: 0.25, color: '#536164', roof: 'waterTank' },
+      { x: 0.87, width: 0.09, height: 0.2, color: '#4e5d60', roof: 'flat' },
+    ],
+  },
+  {
+    baseline: 2,
+    windows: ['#a99e7e', '#c0b58e', '#536267'],
+    buildings: [
+      { x: 0.025, width: 0.095, height: 0.3, color: '#77817d', roof: 'flat' },
+      { x: 0.145, width: 0.085, height: 0.36, color: '#857f73', roof: 'steps', sign: 'hotel' },
+      { x: 0.255, width: 0.075, height: 0.25, color: '#716f69', roof: 'flat' },
+      { x: 0.35, width: 0.085, height: 0.53, color: '#827d70', roof: 'peaked' },
+      { x: 0.455, width: 0.085, height: 0.55, color: '#898374', roof: 'peaked' },
+      { x: 0.58, width: 0.07, height: 0.31, color: '#777971', roof: 'antenna' },
+      { x: 0.7, width: 0.09, height: 0.34, color: '#817b6e', roof: 'flat' },
+      { x: 0.85, width: 0.12, height: 0.37, color: '#817c70', roof: 'flat', sign: 'diner' },
+    ],
+  },
+  {
+    baseline: 5,
+    windows: ['#d0c29a', '#e1d2aa', '#646966'],
+    buildings: [
+      { x: 0.015, width: 0.075, height: 0.15, color: '#a19c89', roof: 'flat' },
+      { x: 0.105, width: 0.085, height: 0.2, color: '#9a978b', roof: 'waterTank' },
+      { x: 0.205, width: 0.065, height: 0.16, color: '#a7a18f', roof: 'flat' },
+      { x: 0.75, width: 0.08, height: 0.17, color: '#969489', roof: 'waterTank' },
+      { x: 0.85, width: 0.065, height: 0.14, color: '#a7a18f', roof: 'flat' },
+      { x: 0.93, width: 0.07, height: 0.18, color: '#9a978b', roof: 'steps' },
+    ],
+  },
 ];
 
 function drawNeonSign(
@@ -63,13 +99,14 @@ function drawBuilding(
   ctx: CanvasRenderingContext2D,
   x: number,
   width: number,
-  horizonY: number,
+  baselineY: number,
   style: BuildingStyle,
   index: number,
   locale: Locale,
+  windows: CityLayer['windows'],
 ) {
-  const buildingHeight = style.height * horizonY * 1.8;
-  const top = horizonY - buildingHeight;
+  const buildingHeight = style.height * baselineY * 0.95;
+  const top = baselineY - buildingHeight;
 
   ctx.fillStyle = '#657477';
   ctx.fillRect(x + 2, top - 2, width + 2, buildingHeight + 2);
@@ -98,29 +135,46 @@ function drawBuilding(
       ctx.fillRect(x + width * 0.3, top - 9, width * 0.4, 5);
       ctx.fillRect(x + width * 0.35, top - 11, width * 0.3, 2);
       break;
+    case 'peaked':
+      ctx.beginPath();
+      ctx.moveTo(x + width * 0.12, top);
+      ctx.lineTo(x + width * 0.5, top - 10);
+      ctx.lineTo(x + width * 0.88, top);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillRect(x + width * 0.46, top - 13, width * 0.08, 3);
+      ctx.strokeStyle = '#565f60';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x + width * 0.08, top + 8);
+      ctx.lineTo(x + width * 0.92, top + 8);
+      ctx.moveTo(x + width * 0.08, top + 17);
+      ctx.lineTo(x + width * 0.92, top + 17);
+      ctx.stroke();
+      break;
     case 'flat':
       ctx.fillRect(x, top - 2, width, 2);
       break;
   }
 
-  const columns = Math.max(2, Math.floor(width / 8));
-  const rows = Math.max(2, Math.floor(buildingHeight / 11));
-  const windowWidth = Math.max(2, Math.min(4, width / (columns * 2.4)));
+  const floors = Math.max(2, Math.floor(buildingHeight / 13));
+  const windowsPerFloor = Math.max(2, Math.floor(width / 10));
+  const windowWidth = Math.max(2, Math.min(4, width / (windowsPerFloor * 2.5)));
   const windowHeight = 3;
-  const columnGap = width / (columns + 1);
-  const rowGap = (buildingHeight - 9) / (rows + 1);
 
-  for (let row = 0; row < rows; row++) {
-    for (let column = 0; column < columns; column++) {
-      const lit = ((row * 7 + column * 3 + index * 5) % 6) !== 0;
+  for (let floor = 0; floor < floors; floor++) {
+    const windowCount = windowsPerFloor - (floor % 3 === 0 ? 1 : 0);
+    const windowGap = width / (windowCount + 1);
+    const floorHeight = buildingHeight / (floors + 1);
+
+    for (let window = 0; window < windowCount; window++) {
+      const lit = ((floor * 7 + window * 3 + index * 5) % 5) !== 0;
       ctx.fillStyle = lit
-        ? (row + column + index) % 3 === 0
-          ? '#e5c995'
-          : '#d7d0ad'
+        ? (floor + window + index) % 3 === 0 ? windows[0] : windows[1]
         : '#536267';
       ctx.fillRect(
-        x + columnGap * (column + 0.5) - windowWidth / 2,
-        top + 6 + rowGap * row,
+        x + windowGap * (window + 1) - windowWidth / 2,
+        top + 7 + floorHeight * floor,
         windowWidth,
         windowHeight,
       );
@@ -132,43 +186,51 @@ function drawBuilding(
   }
 }
 
+function drawHorizonShrubs(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  horizonY: number,
+) {
+  const clusters = [
+    0.015, 0.065, 0.12, 0.24, 0.33, 0.39, 0.62, 0.68, 0.82, 0.94,
+  ];
+
+  clusters.forEach((position, i) => {
+    const x = width * position;
+    const shrubWidth = width * (0.025 + (i % 3) * 0.008);
+    const shrubHeight = 5 + (i % 3) * 2;
+    const baseY = horizonY + 1;
+
+    ctx.fillStyle = i % 2 ? '#465b43' : '#526647';
+    ctx.fillRect(x, baseY - shrubHeight + 2, shrubWidth, shrubHeight - 2);
+    ctx.fillRect(x + shrubWidth * 0.18, baseY - shrubHeight, shrubWidth * 0.3, 4);
+    ctx.fillRect(x + shrubWidth * 0.56, baseY - shrubHeight + 1, shrubWidth * 0.3, 4);
+    ctx.fillStyle = '#718052';
+    ctx.fillRect(x + shrubWidth * 0.22, baseY - shrubHeight + 3, 3, 2);
+    ctx.fillRect(x + shrubWidth * 0.66, baseY - shrubHeight + 5, 3, 2);
+  });
+}
+
 export function drawCity(
   ctx: CanvasRenderingContext2D,
   width: number,
   horizonY: number,
   locale: Locale,
 ) {
-  const farHeights = [0.26, 0.34, 0.3, 0.4, 0.32, 0.37, 0.28];
-  const farColors = ['#879394', '#9e9d91', '#7e8d8e', '#a5a294'];
-  const farWidth = width / farHeights.length;
-
-  farHeights.forEach((height, index) => {
-    const buildingHeight = horizonY * height;
-    ctx.fillStyle = farColors[index % farColors.length];
-    ctx.fillRect(
-      index * farWidth,
-      horizonY - buildingHeight,
-      farWidth + 1,
-      buildingHeight,
-    );
-    ctx.fillStyle = 'rgba(225, 214, 183, 0.65)';
-    for (let row = 0; row < 3; row++) {
-      ctx.fillRect(
-        index * farWidth + 5,
-        horizonY - buildingHeight + 9 + row * 11,
-        3,
-        4,
+  CITY_LAYERS.forEach((layer) => {
+    layer.buildings.forEach((style, index) => {
+      drawBuilding(
+        ctx,
+        width * style.x,
+        width * style.width,
+        horizonY + layer.baseline,
+        style,
+        index,
+        locale,
+        layer.windows,
       );
-    }
+    });
   });
 
-  let x = 0;
-  let index = 0;
-  while (x < width) {
-    const style = BUILDINGS[index % BUILDINGS.length];
-    const buildingWidth = width * style.width;
-    drawBuilding(ctx, x, buildingWidth, horizonY, style, index, locale);
-    x += buildingWidth - 1;
-    index++;
-  }
+  drawHorizonShrubs(ctx, width, horizonY);
 }
