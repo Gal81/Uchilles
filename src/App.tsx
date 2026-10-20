@@ -1,22 +1,13 @@
-import { useEffect, useRef } from 'react';
+import {
+  useRef,
+  useEffect,
+} from 'react';
+import type {
+  GameState,
+  Obstacle,
+} from './game/types.ts';
+import { drawRunner } from './game/drawRunner.ts';
 import './App.css';
-
-type Obstacle = {
-  id: number;
-  lane: number;
-  z: number;
-  kind: 'barrier' | 'car';
-};
-
-type GameState = {
-  lane: number;
-  roadOffset: number;
-  obstacles: Obstacle[];
-  spawnTimer: number;
-  nextId: number;
-  status: 'running' | 'over';
-  distance: number;
-};
 
 const createGame = (): GameState => ({
   lane: 1,
@@ -114,52 +105,6 @@ function App() {
       points.slice(1).forEach(([x, y]) => ctx.lineTo(x, y));
       ctx.closePath();
       ctx.fill();
-    };
-
-    const drawRunner = (
-      x: number,
-      y: number,
-      scale: number,
-      color: string,
-    ) => {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.scale(scale, scale);
-      ctx.lineCap = 'round';
-
-      // Legs
-      ctx.strokeStyle = '#202833';
-      ctx.lineWidth = 7;
-      ctx.beginPath();
-      ctx.moveTo(-5, -19);
-      ctx.lineTo(-10, 0);
-      ctx.moveTo(5, -19);
-      ctx.lineTo(11, 0);
-      ctx.stroke();
-
-      // Body and backpack
-      ctx.fillStyle = '#334f45';
-      ctx.fillRect(-12, -43, 24, 27);
-      ctx.fillStyle = color;
-      ctx.fillRect(-9, -42, 18, 24);
-
-      // Arms
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 6;
-      ctx.beginPath();
-      ctx.moveTo(-10, -38);
-      ctx.lineTo(-17, -23);
-      ctx.moveTo(10, -38);
-      ctx.lineTo(17, -26);
-      ctx.stroke();
-
-      // Head
-      ctx.fillStyle = '#d6a47e';
-      ctx.beginPath();
-      ctx.arc(0, -51, 8, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.restore();
     };
 
     const drawObstacle = (obstacle: Obstacle) => {
@@ -269,8 +214,8 @@ function App() {
         .forEach(drawObstacle);
 
       // Pursuers — closer to the camera than the player
-      drawRunner(width * 0.30, height * 0.78, 1.15, '#475a67');
-      drawRunner(width * 0.70, height * 0.78, 1.15, '#475a67');
+      drawRunner(ctx, width * 0.30, height * 0.78, 1.15, '#475a67');
+      drawRunner(ctx, width * 0.70, height * 0.78, 1.15, '#475a67');
 
       // Player
       const playerDepth = 0.64 * 0.64;
@@ -279,7 +224,7 @@ function App() {
 
       const playerX =
         centerX + (game.lane - 1) * playerRoadWidth / 3;
-      drawRunner(playerX, height * 0.58, 1.05, '#d6a85c');
+      drawRunner(ctx, playerX, height * 0.58, 1.05, '#d6a85c');
 
       // HUD
       ctx.fillStyle = '#14242b';

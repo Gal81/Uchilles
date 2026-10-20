@@ -59,7 +59,8 @@ export default defineConfig([
       jsx: jsxUsesVars,
     },
     rules: {
-      'no-unused-vars': 'error',
+      // TypeScript checks unused locals and parameters via noUnusedLocals/noUnusedParameters.
+      'no-unused-vars': 'off',
       'no-undef': 'off',
       'jsx/jsx-uses-vars': 'error',
     },
