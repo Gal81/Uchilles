@@ -3,6 +3,7 @@ import type { Obstacle } from './entities/obstacle.ts';
 import type { Lane } from './entities/runner.ts';
 import {
   createPlayer,
+  createPursuer,
   createPursuers,
 } from './entities/runner.ts';
 import type { GameState } from './types.ts';
@@ -10,7 +11,14 @@ import type { GameState } from './types.ts';
 const LANE_CHANGE_DURATION = 0.85;
 const PURSUER_LANE_CHANGE_DURATION = 0.55;
 const PURSUER_LOOKAHEAD = 0.42;
+const PURSUER_APPROACH_SPEED = 0.035;
+const PURSUER_ENTRY_SPEED = 0.18;
+const PURSUER_CATCH_DEPTH_MARGIN = 0.015;
+const PURSUER_CATCH_LANE_RADIUS = 0.25;
 const PLAYER_COLLISION_LANE_RADIUS = 0.4;
+const PURSUER_COLLISION_LANE_RADIUS = 0.36;
+const PURSUER_RESPAWN_DELAY = 3.5;
+const PURSUER_FATIGUE_RATE = 0.012;
 const ROAD_SPEED = 0.27;
 const OBSTACLE_SPEED: Record<Obstacle['kind'], number> = {
   barrier: ROAD_SPEED,
@@ -42,7 +50,10 @@ export function createGameState(): GameState {
     spawnTimer: 0,
     nextObstacleId: 0,
     status: 'running',
+    endReason: null,
     distance: 0,
+    pursuerRespawnTimer: 0,
+    nextPursuerId: 0,
   };
 }
 
@@ -118,6 +129,36 @@ function avoidPursuerObstacles(game: GameState) {
   });
 }
 
+function hasPursuerCollision(game: GameState, pursuer: GameState['pursuers'][number]) {
+  return game.obstacles.some(
+    (obstacle) =>
+      obstacle.z >= pursuer.z - 0.035 &&
+      obstacle.z <= pursuer.z + 0.035 &&
+      Math.abs(obstacle.lane - pursuer.lanePosition) <=
+        PURSUER_COLLISION_LANE_RADIUS,
+  );
+}
+
+function replenishPursuers(game: GameState, dt: number) {
+  if (game.pursuers.length >= 2) {
+    game.pursuerRespawnTimer = 0;
+    return;
+  }
+
+  game.pursuerRespawnTimer += dt;
+  if (game.pursuerRespawnTimer < PURSUER_RESPAWN_DELAY) return;
+
+  const occupiedLanes = new Set(game.pursuers.map((pursuer) => pursuer.homeLane));
+  const lanes: Lane[] = [0, 2];
+  const missingLanes = lanes.filter((lane) => !occupiedLanes.has(lane));
+
+  missingLanes.forEach((lane) => {
+    const id = `pursuer-replacement-${game.nextPursuerId++}`;
+    game.pursuers.push(createPursuer(lane, id, true));
+  });
+  game.pursuerRespawnTimer = 0;
+}
+
 function updateRunnerLane(
   runner: {
     lane: Lane;
@@ -154,6 +195,22 @@ export function updateGame(game: GameState, dt: number) {
 
   game.pursuers.forEach((pursuer) => {
     pursuer.animationTime += dt;
+    pursuer.fatigue = Math.min(1, pursuer.fatigue + dt * PURSUER_FATIGUE_RATE);
+    const sharesPlayerLane =
+      Math.abs(pursuer.lanePosition - game.player.lanePosition) <=
+      PLAYER_COLLISION_LANE_RADIUS;
+    const targetZ =
+      pursuer.z > pursuer.homeZ
+        ? pursuer.homeZ
+        : sharesPlayerLane
+          ? game.player.z
+          : pursuer.homeZ;
+    const speed =
+      pursuer.z > pursuer.homeZ
+        ? PURSUER_ENTRY_SPEED
+        : PURSUER_APPROACH_SPEED;
+    const difference = targetZ - pursuer.z;
+    pursuer.z += Math.sign(difference) * Math.min(Math.abs(difference), dt * speed);
   });
 
   if (game.spawnTimer >= 1.35) {
@@ -179,14 +236,39 @@ export function updateGame(game: GameState, dt: number) {
       obstacle.z <= 0.68
     ) {
       game.status = 'over';
+      game.endReason = 'obstacle';
     }
   });
 
   avoidPursuerObstacles(game);
 
   game.pursuers.forEach((pursuer) => {
-    updateRunnerLane(pursuer, dt, PURSUER_LANE_CHANGE_DURATION);
+    updateRunnerLane(
+      pursuer,
+      dt,
+      PURSUER_LANE_CHANGE_DURATION * (1 + pursuer.fatigue * 2),
+    );
   });
+
+  const crashedPursuers = game.pursuers.filter((pursuer) =>
+    hasPursuerCollision(game, pursuer),
+  );
+  if (crashedPursuers.length > 0) {
+    game.pursuers = game.pursuers.filter(
+      (pursuer) => !crashedPursuers.includes(pursuer),
+    );
+  }
+
+  if (game.pursuers.some((pursuer) =>
+    Math.abs(pursuer.lanePosition - game.player.lanePosition) <=
+      PURSUER_CATCH_LANE_RADIUS &&
+    pursuer.z <= game.player.z + PURSUER_CATCH_DEPTH_MARGIN,
+  )) {
+    game.status = 'over';
+    game.endReason = 'caught';
+  }
+
+  replenishPursuers(game, dt);
 
   game.obstacles = game.obstacles.filter(
     (obstacle) => obstacle.z < 1,

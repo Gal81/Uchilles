@@ -12,5 +12,8 @@ export type GameState = {
   spawnTimer: number;
   nextObstacleId: number;
   status: 'running' | 'over';
+  endReason: 'obstacle' | 'caught' | null;
   distance: number;
+  pursuerRespawnTimer: number;
+  nextPursuerId: number;
 };

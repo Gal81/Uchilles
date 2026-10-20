@@ -20,13 +20,13 @@ function drawCloud(
 ) {
   const unit = size * 8;
 
-  ctx.fillStyle = 'rgba(237, 239, 222, 0.72)';
+  ctx.fillStyle = 'rgba(248, 249, 239, 0.92)';
   ctx.fillRect(x, y, unit * 7, unit * 1.4);
   ctx.fillRect(x + unit, y - unit, unit * 2, unit * 2);
   ctx.fillRect(x + unit * 2.5, y - unit * 1.8, unit * 2.5, unit * 2.8);
   ctx.fillRect(x + unit * 4.5, y - unit * 0.8, unit * 1.7, unit * 1.8);
 
-  ctx.fillStyle = 'rgba(255, 255, 240, 0.45)';
+  ctx.fillStyle = 'rgba(255, 255, 250, 0.82)';
   ctx.fillRect(x + unit, y - unit * 0.7, unit * 1.6, unit * 0.5);
   ctx.fillRect(x + unit * 2.8, y - unit * 1.5, unit * 1.7, unit * 0.5);
   ctx.fillRect(x + unit * 5, y - unit * 0.5, unit, unit * 0.4);

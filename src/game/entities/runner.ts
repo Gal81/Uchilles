@@ -20,6 +20,8 @@ export type Pursuer = RunnerBase & {
   role: 'pursuer';
   kind: PursuerKind;
   homeLane: Lane;
+  homeZ: number;
+  fatigue: number;
 };
 
 export type Runner = PlayerRunner | Pursuer;
@@ -39,8 +41,18 @@ export function createPlayer(): PlayerRunner {
 
 export function createPursuers(): Pursuer[] {
   const lanes: Lane[] = [0, 2];
-  return lanes.map((lane) => ({
-    id: `pursuer-${lane}`,
+  return lanes.map((lane) => createPursuer(lane));
+}
+
+export function createPursuer(
+  lane: Lane,
+  id = `pursuer-${lane}`,
+  spawnFromBottom = false,
+): Pursuer {
+  const homeZ = lane === 0 ? 0.9 : 0.88;
+
+  return {
+    id,
     role: 'pursuer',
     kind: 'standard',
     lane,
@@ -48,7 +60,9 @@ export function createPursuers(): Pursuer[] {
     laneChangeStart: lane,
     laneChangeElapsed: 0,
     homeLane: lane,
-    z: lane === 0 ? 0.83 : 0.79,
+    homeZ,
+    z: spawnFromBottom ? 1.12 : homeZ,
     animationTime: 0,
-  }));
+    fatigue: 0,
+  };
 }

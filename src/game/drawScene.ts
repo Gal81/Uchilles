@@ -32,7 +32,10 @@ export function drawScene(
   locale: Locale,
 ) {
   const sky = ctx.createLinearGradient(0, 0, 0, height);
-  sky.addColorStop(0, '#8ab6c1');
+  sky.addColorStop(0, '#39b8ee');
+  sky.addColorStop(0.14, '#69c9ee');
+  sky.addColorStop(0.27, '#a5dff0');
+  sky.addColorStop(0.36, '#f1d4a9');
   sky.addColorStop(1, '#e5d6b7');
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, width, height);
@@ -86,11 +89,9 @@ export function drawScene(
     .sort((a, b) => a.z - b.z)
     .forEach((obstacle) => drawObstacle(ctx, obstacle, width, height));
 
-  game.pursuers
-    .slice()
+  [...game.pursuers, game.player]
     .sort((a, b) => a.z - b.z)
-    .forEach((pursuer) => drawRunner(ctx, pursuer, width, height));
-  drawRunner(ctx, game.player, width, height);
+    .forEach((runner) => drawRunner(ctx, runner, width, height));
 
   ctx.fillStyle = '#14242b';
   ctx.font = 'bold 23px system-ui';
@@ -109,15 +110,26 @@ export function drawScene(
     ctx.fillText(locale.gameOver, centerX, height * 0.43);
 
     ctx.font = '17px system-ui';
+    const detailsY = height * 0.43 + 35;
+    if (game.endReason === 'caught') {
+      const bannerWidth = Math.min(
+        width - 24,
+        ctx.measureText(locale.caughtMessage).width + 32,
+      );
+      ctx.fillStyle = '#c62828';
+      ctx.fillRect(centerX - bannerWidth / 2, detailsY - 22, bannerWidth, 34);
+      ctx.fillStyle = '#fff';
+      ctx.fillText(locale.caughtMessage, centerX, detailsY);
+    }
     ctx.fillText(
       locale.distance(Math.floor(game.distance)),
       centerX,
-      height * 0.43 + 35,
+      detailsY + (game.endReason === 'caught' ? 30 : 0),
     );
     ctx.fillText(
       locale.restartHint,
       centerX,
-      height * 0.43 + 72,
+      detailsY + (game.endReason === 'caught' ? 67 : 37),
     );
     ctx.textAlign = 'start';
   }
