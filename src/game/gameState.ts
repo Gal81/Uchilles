@@ -14,8 +14,24 @@ const PLAYER_COLLISION_LANE_RADIUS = 0.4;
 const ROAD_SPEED = 0.27;
 const OBSTACLE_SPEED: Record<Obstacle['kind'], number> = {
   barrier: ROAD_SPEED,
-  car: 0.38,
+  motorcycle: 0.56,
+  compact: 0.46,
+  sedan: 0.38,
+  truck: 0.31,
+  bus: 0.29,
 };
+const OBSTACLE_KINDS: Array<Obstacle['kind']> = [
+  'barrier',
+  'barrier',
+  'barrier',
+  'motorcycle',
+  'compact',
+  'compact',
+  'sedan',
+  'sedan',
+  'truck',
+  'bus',
+];
 
 export function createGameState(): GameState {
   return {
@@ -145,7 +161,8 @@ export function updateGame(game: GameState, dt: number) {
 
     const lanes: Lane[] = [0, 1, 2];
     const lane = lanes[Math.floor(Math.random() * lanes.length)];
-    const kind = Math.random() < 0.65 ? 'barrier' : 'car';
+    const kind =
+      OBSTACLE_KINDS[Math.floor(Math.random() * OBSTACLE_KINDS.length)];
     game.obstacles.push(
       createObstacle(game.nextObstacleId++, lane, kind),
     );
