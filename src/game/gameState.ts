@@ -44,6 +44,7 @@ const OBSTACLE_KINDS: Array<Obstacle['kind']> = [
   'truck',
   'bus',
 ];
+const UNJUMPABLE_OBSTACLE_KINDS: Obstacle['kind'][] = ['truck', 'bus'];
 
 export function createGameState(): GameState {
   return {
@@ -259,7 +260,8 @@ export function updateGame(game: GameState, dt: number) {
     obstacle.animationTime += dt;
 
     if (
-      game.player.jumpHeight < JUMP_COLLISION_HEIGHT &&
+      (UNJUMPABLE_OBSTACLE_KINDS.includes(obstacle.kind) ||
+        game.player.jumpHeight < JUMP_COLLISION_HEIGHT) &&
       Math.abs(obstacle.lane - game.player.lanePosition) <=
         PLAYER_COLLISION_LANE_RADIUS &&
       obstacle.z >= 0.63 &&
