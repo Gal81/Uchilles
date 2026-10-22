@@ -1,3 +1,4 @@
+import treeSpriteUrl from '../assets/Tree.png';
 import {
   getRoadDepth,
   getRoadHalfWidth,
@@ -6,6 +7,9 @@ import {
 
 type Side = -1 | 1;
 type RoadsideObject = 'tree' | 'bush' | 'stop';
+
+const treeSprite = new Image();
+treeSprite.src = treeSpriteUrl;
 
 function fillPolygon(
   ctx: CanvasRenderingContext2D,
@@ -43,8 +47,8 @@ function drawGroundAndShoulders(
   const bottomDepth = 1;
   const topRoad = getRoadHalfWidth(width, topDepth);
   const bottomRoad = getRoadHalfWidth(width, bottomDepth);
-  const topShoulder = width * 0.014;
-  const bottomShoulder = width * 0.035;
+  const topShoulder = width * 0.028;
+  const bottomShoulder = width * 0.07;
   const topSidewalk = width * 0.028;
   const bottomSidewalk = width * 0.075;
   const centerX = width / 2;
@@ -97,26 +101,11 @@ function drawTree(
   y: number,
   scale: number,
 ) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.scale(scale, scale);
+  if (!treeSprite.complete || treeSprite.naturalWidth === 0) return;
 
-  ctx.fillStyle = '#5c4934';
-  ctx.fillRect(-3, -24, 6, 24);
-  ctx.fillStyle = '#413f2d';
-  ctx.fillRect(-5, -14, 3, 14);
-
-  ctx.fillStyle = '#435943';
-  ctx.fillRect(-13, -43, 26, 17);
-  ctx.fillRect(-10, -51, 20, 15);
-  ctx.fillStyle = '#61754d';
-  ctx.fillRect(-9, -47, 8, 8);
-  ctx.fillRect(3, -43, 7, 7);
-  ctx.fillStyle = '#354b3d';
-  ctx.fillRect(-6, -37, 9, 9);
-  ctx.fillRect(7, -39, 5, 7);
-
-  ctx.restore();
+  const height = 104 * scale;
+  const width = (treeSprite.naturalWidth / treeSprite.naturalHeight) * height;
+  ctx.drawImage(treeSprite, x - width / 2, y - height, width, height);
 }
 
 function drawBush(
