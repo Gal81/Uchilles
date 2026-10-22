@@ -45,11 +45,24 @@ const OBSTACLE_KINDS: Array<Obstacle['kind']> = [
   'bus',
 ];
 const UNJUMPABLE_OBSTACLE_KINDS: Obstacle['kind'][] = ['truck', 'bus'];
+const COLLISION_EXCLAMATIONS = [
+  'Oh, shit!',
+  'BANG!',
+  'F*ck!',
+  'Damn!',
+  'Shit!',
+  'What the hell?!',
+  'Goddammit!',
+  'Screw this!',
+  'Crap!',
+  'Son of a—!',
+];
 
 export function createGameState(): GameState {
   return {
     player: createPlayer(),
     pursuers: createPursuers(),
+    collisionEffects: [],
     roadOffset: 0,
     obstacles: [],
     spawnTimer: 0,
@@ -142,8 +155,11 @@ function avoidPursuerObstacles(game: GameState) {
   });
 }
 
-function hasPursuerCollision(game: GameState, pursuer: GameState['pursuers'][number]) {
-  return game.obstacles.some(
+function getPursuerCollisionObstacle(
+  game: GameState,
+  pursuer: GameState['pursuers'][number],
+) {
+  return game.obstacles.find(
     (obstacle) =>
       obstacle.z >= pursuer.z - 0.035 &&
       obstacle.z <= pursuer.z + 0.035 &&
@@ -196,7 +212,27 @@ function updateRunnerLane(
     (runner.lane - runner.laneChangeStart) * easedProgress;
 }
 
+const COLLISION_EFFECT_DURATION = 1.1;
+
+function addCollisionEffect(
+  game: GameState,
+  lanePosition: number,
+  z: number,
+) {
+  const exclamation =
+    COLLISION_EXCLAMATIONS[
+      Math.floor(Math.random() * COLLISION_EXCLAMATIONS.length)
+    ];
+  game.collisionEffects.push({ lanePosition, z, elapsed: 0, exclamation });
+}
+
 export function updateGame(game: GameState, dt: number) {
+  game.collisionEffects = game.collisionEffects
+    .map((effect) => ({
+      ...effect,
+      elapsed: effect.elapsed + dt,
+    }))
+    .filter((effect) => effect.elapsed < COLLISION_EFFECT_DURATION);
   if (game.status !== 'running') return;
 
   game.distance += dt * 8;
@@ -260,6 +296,7 @@ export function updateGame(game: GameState, dt: number) {
     obstacle.animationTime += dt;
 
     if (
+      game.status === 'running' &&
       (UNJUMPABLE_OBSTACLE_KINDS.includes(obstacle.kind) ||
         game.player.jumpHeight < JUMP_COLLISION_HEIGHT) &&
       Math.abs(obstacle.lane - game.player.lanePosition) <=
@@ -267,6 +304,7 @@ export function updateGame(game: GameState, dt: number) {
       obstacle.z >= 0.63 &&
       obstacle.z <= 0.68
     ) {
+      addCollisionEffect(game, game.player.lanePosition, obstacle.z);
       game.status = 'over';
       game.endReason = 'obstacle';
     }
@@ -282,9 +320,13 @@ export function updateGame(game: GameState, dt: number) {
     );
   });
 
-  const crashedPursuers = game.pursuers.filter((pursuer) =>
-    hasPursuerCollision(game, pursuer),
-  );
+  const crashedPursuers = game.pursuers.filter((pursuer) => {
+    const obstacle = getPursuerCollisionObstacle(game, pursuer);
+    if (!obstacle) return false;
+
+    addCollisionEffect(game, pursuer.lanePosition, obstacle.z);
+    return true;
+  });
   if (crashedPursuers.length > 0) {
     game.pursuers = game.pursuers.filter(
       (pursuer) => !crashedPursuers.includes(pursuer),

@@ -73,7 +73,11 @@ function drawLeg(
   ctx.restore();
 }
 
-function drawSpeechBubble(ctx: CanvasRenderingContext2D, text: string, opacity: number) {
+function drawSpeechBubble(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  opacity: number,
+) {
   ctx.save();
   ctx.globalAlpha = opacity;
   ctx.font = 'bold 12px system-ui';
@@ -85,18 +89,36 @@ function drawSpeechBubble(ctx: CanvasRenderingContext2D, text: string, opacity: 
   const height = 22;
   const left = -width / 2;
   const top = -91;
+  const right = left + width;
+  const bottom = top + height;
 
   ctx.fillStyle = '#fffdf4';
   ctx.strokeStyle = '#30382a';
   ctx.lineWidth = 1.5;
+  ctx.lineJoin = 'miter';
   ctx.beginPath();
-  ctx.roundRect(left, top, width, height, 6);
-  ctx.fill();
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(-4, top + height);
-  ctx.lineTo(0, top + height + 6);
-  ctx.lineTo(4, top + height);
+  ctx.moveTo(left + width * 0.08, top);
+  ctx.lineTo(left + width * 0.24, top - 3);
+  ctx.lineTo(left + width * 0.29, top);
+  ctx.lineTo(left + width * 0.51, top - 4);
+  ctx.lineTo(left + width * 0.57, top);
+  ctx.lineTo(left + width * 0.8, top - 3);
+  ctx.lineTo(left + width * 0.84, top);
+  ctx.lineTo(right, top + 3);
+  ctx.lineTo(right - 3, top + height * 0.3);
+  ctx.lineTo(right + 2, top + height * 0.38);
+  ctx.lineTo(right, top + height * 0.58);
+  ctx.lineTo(right - 3, bottom);
+  ctx.lineTo(left + width * 0.62, bottom);
+  ctx.lineTo(4, bottom + 3);
+  ctx.lineTo(2, bottom + 9);
+  ctx.lineTo(-3, bottom);
+  ctx.lineTo(left + width * 0.34, bottom);
+  ctx.lineTo(left, bottom - 2);
+  ctx.lineTo(left + 3, top + height * 0.62);
+  ctx.lineTo(left - 2, top + height * 0.52);
+  ctx.lineTo(left + 2, top + height * 0.32);
+  ctx.lineTo(left - 2, top + height * 0.24);
   ctx.closePath();
   ctx.fill();
   ctx.stroke();

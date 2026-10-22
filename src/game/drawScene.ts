@@ -10,6 +10,7 @@ import {
 } from './projection.ts';
 import { drawCity } from './drawCity.ts';
 import { drawClouds } from './drawClouds.ts';
+import { drawCollisionEffect } from './drawCollision.ts';
 import type { Locale } from '../locales/index.ts';
 
 const dniproImage = new Image();
@@ -108,6 +109,10 @@ export function drawScene(
   [...game.pursuers, game.player]
     .sort((a, b) => a.z - b.z)
     .forEach((runner) => drawRunner(ctx, runner, width, height, locale));
+
+  game.collisionEffects.forEach((effect) =>
+    drawCollisionEffect(ctx, effect, width, height),
+  );
 
   ctx.fillStyle = '#14242b';
   ctx.font = 'bold 23px system-ui';
