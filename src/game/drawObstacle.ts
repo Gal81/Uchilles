@@ -1,8 +1,32 @@
+import obstacleSpritesUrl from '../assets/Obstacles.png';
 import type { Obstacle } from './entities/obstacle.ts';
 import { projectLanePosition } from './projection.ts';
 
 type VehicleObstacle = Exclude<Obstacle, { kind: 'barrier' }>;
 type Point = [number, number];
+type SpriteFrame = readonly [number, number, number, number];
+
+const obstacleSprites = new Image();
+obstacleSprites.src = obstacleSpritesUrl;
+
+const motorcycleFrames: SpriteFrame[] = [
+  [0, 95, 190, 290],
+  [200, 95, 190, 290],
+  [390, 95, 175, 290],
+];
+const carFrames: SpriteFrame[] = [
+  [560, 155, 240, 235],
+  [800, 155, 230, 235],
+  [1030, 155, 234, 235],
+];
+const truckFrames: SpriteFrame[] = [
+  [0, 410, 210, 320],
+  [210, 410, 205, 320],
+  [410, 410, 210, 320],
+  [615, 410, 205, 320],
+];
+const busFrame: SpriteFrame = [815, 450, 257, 275];
+const barrierFrame: SpriteFrame = [1070, 565, 194, 170];
 
 function assertNever(value: never): never {
   throw new Error(`Unsupported obstacle: ${JSON.stringify(value)}`);
@@ -286,6 +310,60 @@ function drawVehicle(ctx: CanvasRenderingContext2D, obstacle: VehicleObstacle) {
   }
 }
 
+function drawObstacleSprite(
+  ctx: CanvasRenderingContext2D,
+  obstacle: Obstacle,
+) {
+  let frame: SpriteFrame;
+  let height: number;
+  let sizeMultiplier = 1;
+
+  switch (obstacle.kind) {
+    case 'barrier':
+      frame = barrierFrame;
+      height = 27;
+      break;
+    case 'motorcycle':
+      frame = motorcycleFrames[obstacle.id % motorcycleFrames.length];
+      height = 50;
+      sizeMultiplier = 1 / 1.5;
+      break;
+    case 'compact':
+      frame = carFrames[obstacle.id % carFrames.length];
+      height = 38;
+      break;
+    case 'sedan':
+      frame = carFrames[(obstacle.id + 1) % carFrames.length];
+      height = 43;
+      break;
+    case 'truck':
+      frame = truckFrames[obstacle.id % truckFrames.length];
+      height = 58;
+      break;
+    case 'bus':
+      frame = busFrame;
+      height = 66;
+      break;
+    default:
+      return assertNever(obstacle);
+  }
+
+  const [sourceX, sourceY, sourceWidth, sourceHeight] = frame;
+  const spriteHeight = height * 1.5 * sizeMultiplier;
+  const width = (sourceWidth / sourceHeight) * spriteHeight;
+  ctx.drawImage(
+    obstacleSprites,
+    sourceX,
+    sourceY,
+    sourceWidth,
+    sourceHeight,
+    -width / 2,
+    -spriteHeight,
+    width,
+    spriteHeight,
+  );
+}
+
 export function drawObstacle(
   ctx: CanvasRenderingContext2D,
   obstacle: Obstacle,
@@ -302,6 +380,12 @@ export function drawObstacle(
   ctx.save();
   ctx.translate(x, y);
   ctx.scale(scale, scale);
+
+  if (obstacleSprites.complete && obstacleSprites.naturalWidth > 0) {
+    drawObstacleSprite(ctx, obstacle);
+    ctx.restore();
+    return;
+  }
 
   switch (obstacle.kind) {
     case 'barrier':
