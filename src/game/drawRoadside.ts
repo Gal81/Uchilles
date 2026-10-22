@@ -1,4 +1,5 @@
 import bushSpriteUrl from '../assets/Bush.png';
+import busStopSpriteUrl from '../assets/BusStop.png';
 import treeSpriteUrl from '../assets/Tree.png';
 import {
   getRoadDepth,
@@ -13,6 +14,8 @@ const treeSprite = new Image();
 treeSprite.src = treeSpriteUrl;
 const bushSprite = new Image();
 bushSprite.src = bushSpriteUrl;
+const busStopSprite = new Image();
+busStopSprite.src = busStopSpriteUrl;
 
 function fillPolygon(
   ctx: CanvasRenderingContext2D,
@@ -131,6 +134,19 @@ function drawBusStop(
   scale: number,
   side: Side,
 ) {
+  if (busStopSprite.complete && busStopSprite.naturalWidth > 0) {
+    const spriteHeight = 69 * scale;
+    const spriteWidth =
+      (busStopSprite.naturalWidth / busStopSprite.naturalHeight) * spriteHeight;
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(side < 0 ? -1 : 1, 1);
+    ctx.drawImage(busStopSprite, -spriteWidth / 2, -spriteHeight, spriteWidth, spriteHeight);
+    ctx.restore();
+    return;
+  }
+
   ctx.save();
   ctx.translate(x, y);
   ctx.scale(scale, scale);
@@ -194,7 +210,10 @@ export function drawRoadside(
         'tree',
         'bush',
       ];
-      objects.push({ side, z, kind: kinds[index % kinds.length] });
+      const kind = kinds[index % kinds.length];
+      if (kind !== 'stop' || side === -1) {
+        objects.push({ side, z, kind });
+      }
     }
   }
 
