@@ -1,3 +1,13 @@
+import heroSpriteUrl from '../assets/Hero.png';
+
+const heroSprite = new Image();
+heroSprite.src = heroSpriteUrl;
+
+const HERO_FRAME_SIZE = 512;
+const HERO_FRAME_COUNT = 32;
+const HERO_ANIMATION_FPS = 10;
+const HERO_DRAW_SIZE = 94;
+
 function drawSegment(
   ctx: CanvasRenderingContext2D,
   startX: number,
@@ -52,6 +62,38 @@ export function drawHero(
 ) {
   const progress = Math.max(0, Math.min(1, jumpProgress));
   const airborne = Math.sin(progress * Math.PI);
+
+  if (heroSprite.complete && heroSprite.naturalWidth > 0) {
+    ctx.save();
+    ctx.fillStyle = `rgba(20, 25, 27, ${0.3 - airborne * 0.16})`;
+    ctx.beginPath();
+    ctx.ellipse(0, 4, 15 - airborne * 4, 4 - airborne, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.translate(0, -jumpHeight);
+
+    const frame =
+      progress > 0
+        ? 0
+        : Math.floor(Math.max(0, time) * HERO_ANIMATION_FPS) %
+          HERO_FRAME_COUNT;
+    const sourceX = (frame % 8) * HERO_FRAME_SIZE;
+    const sourceY = Math.floor(frame / 8) * HERO_FRAME_SIZE;
+    const drawTop = -HERO_DRAW_SIZE * 0.85;
+    ctx.drawImage(
+      heroSprite,
+      sourceX,
+      sourceY,
+      HERO_FRAME_SIZE,
+      HERO_FRAME_SIZE,
+      -HERO_DRAW_SIZE / 2,
+      drawTop,
+      HERO_DRAW_SIZE,
+      HERO_DRAW_SIZE,
+    );
+    ctx.restore();
+    return;
+  }
+
   const anticipation =
     progress < 0.16 ? Math.sin((progress / 0.16) * Math.PI) : 0;
   const landing = progress > 0.82 ? (progress - 0.82) / 0.18 : 0;
