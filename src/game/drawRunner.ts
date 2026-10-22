@@ -2,12 +2,14 @@ import type { Runner } from './entities/runner.ts';
 import { projectLanePosition } from './projection.ts';
 import { drawHero } from './drawHero.ts';
 import { drawMilitaryPursuer } from './drawMilitaryPursuer.ts';
+import type { Locale } from '../locales/index.ts';
 
 export function drawRunner(
   ctx: CanvasRenderingContext2D,
   runner: Runner,
   width: number,
   height: number,
+  locale: Locale,
 ) {
   const { x, y, scale } = projectLanePosition(
     width,
@@ -28,7 +30,7 @@ export function drawRunner(
       runner.jumpProgress,
     );
   } else {
-    drawMilitaryPursuer(ctx, runner);
+    drawMilitaryPursuer(ctx, runner, locale.pursuerTaunts);
   }
 
   ctx.restore();

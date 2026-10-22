@@ -107,7 +107,7 @@ export function drawScene(
 
   [...game.pursuers, game.player]
     .sort((a, b) => a.z - b.z)
-    .forEach((runner) => drawRunner(ctx, runner, width, height));
+    .forEach((runner) => drawRunner(ctx, runner, width, height, locale));
 
   ctx.fillStyle = '#14242b';
   ctx.font = 'bold 23px system-ui';

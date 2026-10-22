@@ -1,5 +1,8 @@
 import type { Pursuer } from './entities/runner.ts';
 
+const TAUNT_INTERVAL = 9;
+const TAUNT_DURATION = 2.2;
+
 function drawSegment(
   ctx: CanvasRenderingContext2D,
   startX: number,
@@ -70,9 +73,43 @@ function drawLeg(
   ctx.restore();
 }
 
+function drawSpeechBubble(ctx: CanvasRenderingContext2D, text: string, opacity: number) {
+  ctx.save();
+  ctx.globalAlpha = opacity;
+  ctx.font = 'bold 12px system-ui';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  const paddingX = 8;
+  const width = ctx.measureText(text).width + paddingX * 2;
+  const height = 22;
+  const left = -width / 2;
+  const top = -91;
+
+  ctx.fillStyle = '#fffdf4';
+  ctx.strokeStyle = '#30382a';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.roundRect(left, top, width, height, 6);
+  ctx.fill();
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(-4, top + height);
+  ctx.lineTo(0, top + height + 6);
+  ctx.lineTo(4, top + height);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = '#252a22';
+  ctx.fillText(text, 0, top + height / 2, width - paddingX);
+  ctx.restore();
+}
+
 export function drawMilitaryPursuer(
   ctx: CanvasRenderingContext2D,
   pursuer: Pursuer,
+  taunts: readonly string[],
 ) {
   const phase = pursuer.animationTime * 9;
   const leftStride = Math.sin(phase);
@@ -197,4 +234,18 @@ export function drawMilitaryPursuer(
   ctx.fillRect(-3, -49, 6, 1.5);
 
   ctx.restore();
+
+  const idOffset = [...pursuer.id].reduce(
+    (offset, character) => offset + character.charCodeAt(0),
+    0,
+  ) % TAUNT_INTERVAL;
+  const elapsed = pursuer.animationTime + idOffset;
+  const tauntPhase = elapsed % TAUNT_INTERVAL;
+  if (tauntPhase < TAUNT_DURATION && taunts.length > 0) {
+    const fadeIn = Math.min(1, tauntPhase / 0.2);
+    const fadeOut = Math.min(1, (TAUNT_DURATION - tauntPhase) / 0.25);
+    const tauntIndex =
+      Math.floor(elapsed / TAUNT_INTERVAL) % taunts.length;
+    drawSpeechBubble(ctx, taunts[tauntIndex], Math.min(fadeIn, fadeOut));
+  }
 }
