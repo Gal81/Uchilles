@@ -1,3 +1,4 @@
+import dniproImageUrl from '../assets/Dnipro.png';
 import type { GameState } from './types.ts';
 import { drawObstacle } from './drawObstacle.ts';
 import { drawRunner } from './drawRunner.ts';
@@ -10,6 +11,9 @@ import {
 import { drawCity } from './drawCity.ts';
 import { drawClouds } from './drawClouds.ts';
 import type { Locale } from '../locales/index.ts';
+
+const dniproImage = new Image();
+dniproImage.src = dniproImageUrl;
 
 function fillPolygon(
   ctx: CanvasRenderingContext2D,
@@ -44,7 +48,19 @@ export function drawScene(
   const centerX = width / 2;
 
   drawClouds(ctx, width, height, game.distance);
-  drawCity(ctx, width, horizonY, locale);
+  if (dniproImage.complete && dniproImage.naturalWidth > 0) {
+    const imageHeight =
+      (width * dniproImage.naturalHeight) / dniproImage.naturalWidth;
+    ctx.drawImage(
+      dniproImage,
+      0,
+      horizonY + height * 0.025 - imageHeight,
+      width,
+      imageHeight,
+    );
+  } else {
+    drawCity(ctx, width, horizonY, locale);
+  }
 
   drawRoadside(ctx, width, height, game.roadOffset);
 
