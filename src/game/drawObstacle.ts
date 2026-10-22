@@ -6,6 +6,8 @@ type VehicleObstacle = Exclude<Obstacle, { kind: 'barrier' }>;
 type Point = [number, number];
 type SpriteFrame = readonly [number, number, number, number];
 
+const BUS_ROUTE_NUMBERS = [7, 17, 20, 38, 88, 115, 124] as const;
+
 const obstacleSprites = new Image();
 obstacleSprites.src = obstacleSpritesUrl;
 
@@ -43,6 +45,32 @@ function fillShape(
   points.slice(1).forEach(([x, y]) => ctx.lineTo(x, y));
   ctx.closePath();
   ctx.fill();
+}
+
+function drawBusRouteNumber(
+  ctx: CanvasRenderingContext2D,
+  obstacle: VehicleObstacle,
+  centerY: number,
+  fontSize: number,
+) {
+  const routeNumber =
+    BUS_ROUTE_NUMBERS[obstacle.id % BUS_ROUTE_NUMBERS.length].toString();
+
+  ctx.save();
+  ctx.font = `bold ${fontSize}px system-ui`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const textWidth = ctx.measureText(routeNumber).width;
+  ctx.fillStyle = '#243032';
+  ctx.fillRect(
+    -textWidth / 2 - 2,
+    centerY - fontSize * 0.75,
+    textWidth + 4,
+    fontSize * 1.5,
+  );
+  ctx.fillStyle = '#f0d58b';
+  ctx.fillText(routeNumber, 0, centerY);
+  ctx.restore();
 }
 
 function drawMotorcycle(ctx: CanvasRenderingContext2D, color: string) {
@@ -229,6 +257,7 @@ function drawLargeVehicle(
     ctx.fillRect(-halfWidth * 0.74, roofY + 4, halfWidth * 1.48, 7);
     ctx.fillStyle = '#f0d58b';
     ctx.fillRect(-halfWidth * 0.6, roofY + 6, halfWidth * 1.2, 2);
+    drawBusRouteNumber(ctx, obstacle, roofY + 7.5, 7);
     fillShape(
       ctx,
       [
@@ -383,6 +412,16 @@ export function drawObstacle(
 
   if (obstacleSprites.complete && obstacleSprites.naturalWidth > 0) {
     drawObstacleSprite(ctx, obstacle);
+    if (obstacle.kind === 'bus') {
+      const spriteHeight = 66 * 1.5;
+      const spriteScale = spriteHeight / busFrame[3];
+      drawBusRouteNumber(
+        ctx,
+        obstacle,
+        -spriteHeight + 36 * spriteScale,
+        26 * spriteScale,
+      );
+    }
     ctx.restore();
     return;
   }
