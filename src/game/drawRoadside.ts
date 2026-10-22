@@ -1,3 +1,4 @@
+import bushSpriteUrl from '../assets/Bush.png';
 import treeSpriteUrl from '../assets/Tree.png';
 import {
   getRoadDepth,
@@ -10,6 +11,8 @@ type RoadsideObject = 'tree' | 'bush' | 'stop';
 
 const treeSprite = new Image();
 treeSprite.src = treeSpriteUrl;
+const bushSprite = new Image();
+bushSprite.src = bushSpriteUrl;
 
 function fillPolygon(
   ctx: CanvasRenderingContext2D,
@@ -113,23 +116,12 @@ function drawBush(
   x: number,
   y: number,
   scale: number,
-  variant: number,
 ) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.scale(scale, scale);
+  if (!bushSprite.complete || bushSprite.naturalWidth === 0) return;
 
-  ctx.fillStyle = variant ? '#465b41' : '#536746';
-  ctx.fillRect(-12, -10, 24, 10);
-  ctx.fillRect(-9, -15, 8, 7);
-  ctx.fillRect(1, -17, 9, 8);
-  ctx.fillStyle = '#758054';
-  ctx.fillRect(-6, -12, 5, 4);
-  ctx.fillRect(4, -14, 4, 4);
-  ctx.fillStyle = '#3d5541';
-  ctx.fillRect(-12, -7, 7, 5);
-
-  ctx.restore();
+  const height = 39 * scale;
+  const width = (bushSprite.naturalWidth / bushSprite.naturalHeight) * height;
+  ctx.drawImage(bushSprite, x - width / 2, y - height, width, height);
 }
 
 function drawBusStop(
@@ -186,7 +178,6 @@ export function drawRoadside(
     side: Side;
     z: number;
     kind: RoadsideObject;
-    index: number;
   }> = [];
 
   for (const side of [-1, 1] as const) {
@@ -203,13 +194,13 @@ export function drawRoadside(
         'tree',
         'bush',
       ];
-      objects.push({ side, z, kind: kinds[index % kinds.length], index });
+      objects.push({ side, z, kind: kinds[index % kinds.length] });
     }
   }
 
   objects
     .sort((a, b) => a.z - b.z)
-    .forEach(({ side, z, kind, index }) => {
+    .forEach(({ side, z, kind }) => {
       const depth = getRoadDepth(z);
       const point = roadsidePoint(
         width,
@@ -224,7 +215,7 @@ export function drawRoadside(
           drawTree(ctx, point.x, point.y, 0.4 + z * 1.5);
           break;
         case 'bush':
-          drawBush(ctx, point.x, point.y, 0.48 + z * 1.7, index % 2);
+          drawBush(ctx, point.x, point.y, 0.48 + z * 1.7);
           break;
         case 'stop':
           drawBusStop(ctx, point.x, point.y, 0.28 + z * 1.28, side);
