@@ -1,7 +1,16 @@
+import pursuerSpriteUrl from '../assets/Pursuer.png';
 import type { Pursuer } from './entities/runner.ts';
 
 const TAUNT_INTERVAL = 9;
 const TAUNT_DURATION = 2.2;
+const PURSUER_COLUMNS = 8;
+const PURSUER_ROWS = 4;
+const PURSUER_FRAME_COUNT = PURSUER_COLUMNS * PURSUER_ROWS;
+const PURSUER_ANIMATION_FPS = 10;
+const PURSUER_DRAW_SIZE = 94;
+
+const pursuerSprite = new Image();
+pursuerSprite.src = pursuerSpriteUrl;
 
 function drawSegment(
   ctx: CanvasRenderingContext2D,
@@ -88,7 +97,7 @@ function drawSpeechBubble(
   const width = ctx.measureText(text).width + paddingX * 2;
   const height = 22;
   const left = -width / 2;
-  const top = -91;
+  const top = -103;
   const right = left + width;
   const bottom = top + height;
 
@@ -153,107 +162,124 @@ export function drawMilitaryPursuer(
   ctx.ellipse(0, 4, 14, 4, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.translate(0, -bob);
+  if (pursuerSprite.complete && pursuerSprite.naturalWidth > 0) {
+    const frame = Math.floor(
+      Math.max(0, pursuer.animationTime) * PURSUER_ANIMATION_FPS,
+    ) % PURSUER_FRAME_COUNT;
+    const sourceWidth = pursuerSprite.naturalWidth / PURSUER_COLUMNS;
+    const sourceHeight = pursuerSprite.naturalHeight / PURSUER_ROWS;
 
-  drawLeg(ctx, 3, 3 + rightStride * 0.8, rightFootY, 0);
-  drawLeg(ctx, -3, -3 + leftStride * 0.8, leftFootY, 1);
+    ctx.drawImage(
+      pursuerSprite,
+      (frame % PURSUER_COLUMNS) * sourceWidth,
+      Math.floor(frame / PURSUER_COLUMNS) * sourceHeight,
+      sourceWidth,
+      sourceHeight,
+      -PURSUER_DRAW_SIZE / 2,
+      -PURSUER_DRAW_SIZE * 0.85,
+      PURSUER_DRAW_SIZE,
+      PURSUER_DRAW_SIZE,
+    );
+  } else {
+    ctx.translate(0, -bob);
 
-  const rightElbowY = -31 + rightArmSwing * 2.5;
-  const rightHandY = -24 + rightArmSwing * 5;
-  drawSegment(ctx, 8, -39, 10, rightElbowY, '#46502e', 5);
-  ctx.fillStyle = '#b5a04a';
-  ctx.fillRect(8, rightElbowY + 1, 2, 2);
-  drawSegment(
-    ctx,
-    10,
-    rightElbowY,
-    9 + rightArmSwing * 1.5,
-    rightHandY,
-    '#85803c',
-    4,
-  );
+    drawLeg(ctx, 3, 3 + rightStride * 0.8, rightFootY, 0);
+    drawLeg(ctx, -3, -3 + leftStride * 0.8, leftFootY, 1);
 
-  const leftElbowY = -31 + leftArmSwing * 2.5;
-  const leftHandY = -24 + leftArmSwing * 5;
-  drawSegment(ctx, -8, -39, -10, leftElbowY, '#46502e', 5);
-  ctx.fillStyle = '#9b8436';
-  ctx.fillRect(-11, leftElbowY + 1, 2, 2);
-  drawSegment(
-    ctx,
-    -10,
-    leftElbowY,
-    -9 - leftArmSwing * 1.5,
-    leftHandY,
-    '#a49343',
-    4,
-  );
+    const rightElbowY = -31 + rightArmSwing * 2.5;
+    const rightHandY = -24 + rightArmSwing * 5;
+    drawSegment(ctx, 8, -39, 10, rightElbowY, '#46502e', 5);
+    ctx.fillStyle = '#b5a04a';
+    ctx.fillRect(8, rightElbowY + 1, 2, 2);
+    drawSegment(
+      ctx,
+      10,
+      rightElbowY,
+      9 + rightArmSwing * 1.5,
+      rightHandY,
+      '#85803c',
+      4,
+    );
 
-  // Uniform jacket, with blocky yellow-green camouflage.
-  ctx.fillStyle = '#343f2a';
-  ctx.beginPath();
-  ctx.moveTo(-7, -43);
-  ctx.quadraticCurveTo(0, -46, 7, -43);
-  ctx.lineTo(11, -25);
-  ctx.lineTo(8, -20);
-  ctx.lineTo(-8, -20);
-  ctx.lineTo(-11, -25);
-  ctx.closePath();
-  ctx.fill();
-  drawCamouflage(ctx, -8, -42, 16, 20);
+    const leftElbowY = -31 + leftArmSwing * 2.5;
+    const leftHandY = -24 + leftArmSwing * 5;
+    drawSegment(ctx, -8, -39, -10, leftElbowY, '#46502e', 5);
+    ctx.fillStyle = '#9b8436';
+    ctx.fillRect(-11, leftElbowY + 1, 2, 2);
+    drawSegment(
+      ctx,
+      -10,
+      leftElbowY,
+      -9 - leftArmSwing * 1.5,
+      leftHandY,
+      '#a49343',
+      4,
+    );
 
-  // Shoulder straps, belt, and compact field pack.
-  ctx.strokeStyle = '#30382a';
-  ctx.lineWidth = 2.5;
-  ctx.beginPath();
-  ctx.moveTo(-4, -41);
-  ctx.lineTo(-7, -27);
-  ctx.moveTo(4, -41);
-  ctx.lineTo(7, -27);
-  ctx.stroke();
+    ctx.fillStyle = '#343f2a';
+    ctx.beginPath();
+    ctx.moveTo(-7, -43);
+    ctx.quadraticCurveTo(0, -46, 7, -43);
+    ctx.lineTo(11, -25);
+    ctx.lineTo(8, -20);
+    ctx.lineTo(-8, -20);
+    ctx.lineTo(-11, -25);
+    ctx.closePath();
+    ctx.fill();
+    drawCamouflage(ctx, -8, -42, 16, 20);
 
-  ctx.fillStyle = '#42452c';
-  ctx.beginPath();
-  ctx.roundRect(-4, -39, 8, 13, 2);
-  ctx.fill();
-  ctx.fillStyle = '#59613a';
-  ctx.beginPath();
-  ctx.roundRect(-3, -38, 6, 8, 1);
-  ctx.fill();
-  ctx.fillStyle = '#b2a149';
-  ctx.fillRect(-2, -36, 2, 2);
-  ctx.fillStyle = '#333d2d';
-  ctx.fillRect(1, -33, 2, 2);
-  ctx.fillStyle = '#383624';
-  ctx.fillRect(-8, -25, 16, 3);
-  ctx.fillStyle = '#b1a14b';
-  ctx.fillRect(-1, -25, 3, 3);
+    ctx.strokeStyle = '#30382a';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(-4, -41);
+    ctx.lineTo(-7, -27);
+    ctx.moveTo(4, -41);
+    ctx.lineTo(7, -27);
+    ctx.stroke();
 
-  // Neck, back of the head, and a rear-facing military field cap.
-  ctx.fillStyle = '#9b7654';
-  ctx.fillRect(-3, -47, 6, 5);
-  ctx.fillStyle = '#bd936c';
-  ctx.beginPath();
-  ctx.ellipse(0, -49, 6, 6, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillRect(-7, -50, 2, 3);
-  ctx.fillRect(5, -50, 2, 3);
+    ctx.fillStyle = '#42452c';
+    ctx.beginPath();
+    ctx.roundRect(-4, -39, 8, 13, 2);
+    ctx.fill();
+    ctx.fillStyle = '#59613a';
+    ctx.beginPath();
+    ctx.roundRect(-3, -38, 6, 8, 1);
+    ctx.fill();
+    ctx.fillStyle = '#b2a149';
+    ctx.fillRect(-2, -36, 2, 2);
+    ctx.fillStyle = '#333d2d';
+    ctx.fillRect(1, -33, 2, 2);
+    ctx.fillStyle = '#383624';
+    ctx.fillRect(-8, -25, 16, 3);
+    ctx.fillStyle = '#b1a14b';
+    ctx.fillRect(-1, -25, 3, 3);
 
-  ctx.fillStyle = '#8a8a42';
-  ctx.beginPath();
-  ctx.moveTo(-7, -51);
-  ctx.lineTo(-6, -57);
-  ctx.lineTo(-3, -60);
-  ctx.lineTo(3, -60);
-  ctx.lineTo(7, -56);
-  ctx.lineTo(7, -51);
-  ctx.closePath();
-  ctx.fill();
-  ctx.fillStyle = '#525d32';
-  ctx.fillRect(-7, -52, 14, 2);
-  ctx.fillStyle = '#c1a54d';
-  ctx.fillRect(-1, -56, 2, 2);
-  ctx.fillStyle = '#485331';
-  ctx.fillRect(-3, -49, 6, 1.5);
+    ctx.fillStyle = '#9b7654';
+    ctx.fillRect(-3, -47, 6, 5);
+    ctx.fillStyle = '#bd936c';
+    ctx.beginPath();
+    ctx.ellipse(0, -49, 6, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillRect(-7, -50, 2, 3);
+    ctx.fillRect(5, -50, 2, 3);
+
+    ctx.fillStyle = '#8a8a42';
+    ctx.beginPath();
+    ctx.moveTo(-7, -51);
+    ctx.lineTo(-6, -57);
+    ctx.lineTo(-3, -60);
+    ctx.lineTo(3, -60);
+    ctx.lineTo(7, -56);
+    ctx.lineTo(7, -51);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#525d32';
+    ctx.fillRect(-7, -52, 14, 2);
+    ctx.fillStyle = '#c1a54d';
+    ctx.fillRect(-1, -56, 2, 2);
+    ctx.fillStyle = '#485331';
+    ctx.fillRect(-3, -49, 6, 1.5);
+  }
 
   ctx.restore();
 
