@@ -70,12 +70,24 @@
 .loading-error {
   position: absolute;
   right: 12px;
-  bottom: 12px;
+  bottom: 34px;
   left: 12px;
   color: #fff;
   font-size: 14px;
   text-align: center;
   text-shadow: 0 1px 4px #000;
+}
+
+.build-version {
+  position: absolute;
+  bottom: 12px;
+  left: max(12px, calc((100% - 430px) / 2 + 12px));
+  padding: 4px 7px;
+  border-radius: 3px;
+  background: rgb(0 0 0 / 65%);
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.2;
 }
 
 .start-button {

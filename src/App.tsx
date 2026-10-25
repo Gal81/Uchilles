@@ -231,6 +231,7 @@ function App() {
           {loadingError && (
             <span className="loading-error">{loadingError}</span>
           )}
+          <span className="build-version">{__BUILD_VERSION__}</span>
           <button
             className="start-button"
             type="button"
