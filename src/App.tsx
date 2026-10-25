@@ -2,7 +2,16 @@ import {
   useSyncExternalStore,
   useRef,
   useEffect,
+  useState,
 } from 'react';
+import busStopImageUrl from './assets/BusStop.png';
+import bushImageUrl from './assets/Bush.png';
+import dniproImageUrl from './assets/Dnipro.png';
+import heroImageUrl from './assets/Hero.png';
+import obstaclesImageUrl from './assets/Obstacles.png';
+import pursuerImageUrl from './assets/Pursuer.png';
+import splashImageUrl from './assets/splash.jpg';
+import treeImageUrl from './assets/Tree.png';
 import {
   createGameState,
   changePlayerLane,
@@ -13,8 +22,33 @@ import { drawScene } from './game/drawScene.ts';
 import { getLocale, subscribeToLocale } from './locales/index.ts';
 import './App.css';
 
+const GAME_ASSETS = [
+  busStopImageUrl,
+  bushImageUrl,
+  dniproImageUrl,
+  heroImageUrl,
+  obstaclesImageUrl,
+  pursuerImageUrl,
+  splashImageUrl,
+  treeImageUrl,
+];
+const INTRO_SCREEN_DURATION = 2000;
+
+function preloadImage(src: string) {
+  return new Promise<void>((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve();
+    image.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+    image.src = src;
+  });
+}
+
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [showIntro, setShowIntro] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasStarted, setHasStarted] = useState(false);
+  const [loadingError, setLoadingError] = useState<string | null>(null);
   const locale = useSyncExternalStore(
     subscribeToLocale,
     getLocale,
@@ -29,6 +63,49 @@ function App() {
   }, [locale]);
 
   useEffect(() => {
+    const introTimer = window.setTimeout(
+      () => setShowIntro(false),
+      INTRO_SCREEN_DURATION,
+    );
+
+    return () => window.clearTimeout(introTimer);
+  }, []);
+
+  useEffect(() => {
+    let isActive = true;
+    let loadingTimer = 0;
+    const startedAt = performance.now();
+
+    void Promise.allSettled(GAME_ASSETS.map(preloadImage)).then((results) => {
+      if (!isActive) return;
+
+      const failedAssets = results.flatMap((result) =>
+        result.status === 'rejected' ? [result.reason] : [],
+      );
+
+      if (failedAssets.length > 0) {
+        failedAssets.forEach((error) => console.error(error));
+        setLoadingError('Some game images could not be loaded.');
+      }
+
+      const remainingDisplayTime = Math.max(
+        0,
+        800 - (performance.now() - startedAt),
+      );
+      loadingTimer = window.setTimeout(() => {
+        if (isActive) setIsLoading(false);
+      }, remainingDisplayTime);
+    });
+
+    return () => {
+      isActive = false;
+      window.clearTimeout(loadingTimer);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!hasStarted) return;
+
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
@@ -126,7 +203,7 @@ function App() {
       canvas.removeEventListener('touchstart', onTouchStart);
       canvas.removeEventListener('touchend', onTouchEnd);
     };
-  }, []);
+  }, [hasStarted]);
 
   return (
     <main className="game-shell">
@@ -135,6 +212,35 @@ function App() {
         className="game-canvas"
         aria-label={locale.canvasLabel}
       />
+      {showIntro && !hasStarted && (
+        <div className="studio-splash" aria-label="Very Powerful Studio">
+          <div className="studio-splash-text" aria-hidden="true">
+            <span>very</span>
+            <span>powerful</span>
+            <span>studio</span>
+          </div>
+        </div>
+      )}
+      {!hasStarted && (
+        <div
+          className={`loading-screen${showIntro ? ' loading-screen-hidden' : ''}`}
+          role={isLoading ? 'status' : undefined}
+          aria-label={isLoading ? 'Loading game' : 'Game start screen'}
+        >
+          <img src={splashImageUrl} alt="" />
+          {loadingError && (
+            <span className="loading-error">{loadingError}</span>
+          )}
+          <button
+            className="start-button"
+            type="button"
+            disabled={isLoading}
+            onClick={() => setHasStarted(true)}
+          >
+            {locale.startLabel}
+          </button>
+        </div>
+      )}
     </main>
   );
 }

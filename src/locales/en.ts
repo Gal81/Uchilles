@@ -3,6 +3,7 @@ export const en = {
   documentTitle: 'Uchilles',
   gameTitle: 'UCHILLES',
   canvasLabel: 'Uchilles endless runner game',
+  startLabel: 'START',
   distance: (meters: number) => `Distance: ${meters} m`,
   jumpLabel: 'JUMP',
   gameOver: 'Game over!',

@@ -3,6 +3,7 @@
 }
 
 .game-shell {
+  position: relative;
   width: 100%;
   height: 100vh;
   height: 100dvh;
@@ -18,4 +19,94 @@
   height: 100%;
   touch-action: none;
   user-select: none;
+}
+
+.loading-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  background: #10151c;
+}
+
+.loading-screen-hidden {
+  visibility: hidden;
+}
+
+.loading-screen img {
+  display: block;
+  width: min(100%, 430px);
+  height: 100%;
+  object-fit: contain;
+}
+
+.studio-splash {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  background: #050505;
+}
+
+.studio-splash-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08em;
+  color: #ed1c24;
+  font-family: 'Courier New', monospace;
+  font-size: clamp(2rem, 11vw, 4rem);
+  font-weight: 900;
+  line-height: 0.95;
+  text-align: center;
+  text-transform: lowercase;
+  text-shadow: 5px 5px 0 #f2f2f2;
+  -webkit-font-smoothing: none;
+  image-rendering: pixelated;
+}
+
+.loading-error {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  left: 12px;
+  color: #fff;
+  font-size: 14px;
+  text-align: center;
+  text-shadow: 0 1px 4px #000;
+}
+
+.start-button {
+  position: absolute;
+  bottom: 12%;
+  left: 50%;
+  min-width: 180px;
+  padding: 14px 32px;
+  transform: translateX(-50%);
+  border: 2px solid #fff;
+  border-radius: 4px;
+  background: #d92732;
+  color: #fff;
+  font: inherit;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgb(0 0 0 / 45%);
+}
+
+.start-button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.start-button:not(:disabled):hover {
+  background: #ef3540;
+}
+
+.start-button:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 4px;
 }
