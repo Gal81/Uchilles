@@ -124,10 +124,7 @@ export function drawScene(
   const jumpBarX = 18;
   const jumpBarY = 78;
   const jumpBarWidth = 116;
-  const jumpBarHeight = 9;
-  ctx.font = 'bold 11px system-ui';
-  ctx.fillStyle = '#14242b';
-  ctx.fillText(locale.jumpLabel, jumpBarX, jumpBarY + 24);
+  const jumpBarHeight = 16;
   ctx.fillStyle = 'rgba(20, 36, 43, 0.55)';
   ctx.fillRect(jumpBarX, jumpBarY, jumpBarWidth, jumpBarHeight);
   ctx.fillStyle = game.player.jumpCharge >= 1 ? '#60c96b' : '#e5b84d';
@@ -140,6 +137,9 @@ export function drawScene(
   ctx.strokeStyle = '#14242b';
   ctx.lineWidth = 1;
   ctx.strokeRect(jumpBarX, jumpBarY, jumpBarWidth, jumpBarHeight);
+  ctx.font = 'bold 11px system-ui';
+  ctx.fillStyle = '#14242b';
+  ctx.fillText(locale.jumpLabel, jumpBarX + 4, jumpBarY + 12);
 
   if (game.status === 'over') {
     ctx.fillStyle = 'rgba(13, 24, 31, 0.76)';
