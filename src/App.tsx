@@ -11,6 +11,7 @@ import heroImageUrl from './assets/Hero.png';
 import obstaclesImageUrl from './assets/Obstacles.png';
 import pursuerImageUrl from './assets/Pursuer.png';
 import splashImageUrl from './assets/splash.jpg';
+import studioLogoImageUrl from './assets/studio-logo.png';
 import treeImageUrl from './assets/Tree.png';
 import {
   createGameState,
@@ -213,12 +214,12 @@ function App() {
         aria-label={locale.canvasLabel}
       />
       {showIntro && !hasStarted && (
-        <div className="studio-splash" aria-label="Very Powerful Studio">
-          <div className="studio-splash-text" aria-hidden="true">
-            <span>very</span>
-            <span>powerful</span>
-            <span>studio</span>
-          </div>
+        <div className="studio-splash">
+          <img
+            className="studio-splash-logo"
+            src={studioLogoImageUrl}
+            alt="Very Powerful Studio"
+          />
         </div>
       )}
       {!hasStarted && (
